@@ -34,7 +34,7 @@
 \title{\textbf{Fourier Neural Operator with Conformal Fourier Transform Residual Correction for Partial Differential Equations}}
 
 \author{
-    Taiqian Liu$^{1}$, Lijun Liu$^{1,*}$ \\
+    Taiqian Liu$^{1}$, Chunhui Zhu$^{1}$, Lijun Liu$^{1,*}$ \\
     \\
     $^{1}$Xiamen University, Xiamen, China \\
     $^{*}$Corresponding author: liulijun@xmu.edu.cn
@@ -47,13 +47,7 @@
 \maketitle
 
 \begin{abstract}
-Neural operators learn maps between function spaces and promise resolution-robust PDE solvers. Among them, the Fourier Neural Operator (FNO) parameterizes kernels in the spectral domain but inherits limitations of the discrete Fourier transform: mode truncation, aliasing under finite sampling, and error accumulation in long-horizon rollouts.
-
-We introduce FNO-RC, a dual-path architecture that augments FNO with a conformal continuous Fourier transform (CFT) residual branch. The branch computes time-dependent, spatially broadcast corrections via piecewise Chebyshev expansions with closed-form Bessel evaluations, and is activated only in the first layers with explicit warmup and high-frequency/time-smoothing regularization.
-
-On Burgers-1D, Navier–Stokes-2D, and turbulent Navier–Stokes-3D, FNO-RC achieves consistent gains (up to 73.68% on 2D; 43.76% on 3D high-Re) under a unified training and evaluation protocol. Cross-resolution testing, 100-step rollouts, and spectral diagnostics corroborate that CFT corrects FNO’s high-frequency deficit while preserving stability.
-
-Our results show that hybrid continuous–discrete spectral representations provide a principled route to robust long-horizon operator learning without sacrificing efficiency. Code, data splits, scripts, and selected figures are publicly available at \href{https://github.com/LTQ12/fno-rc-operator}{github.com/LTQ12/fno-rc-operator} for full reproducibility.
+Neural operators promise resolution-robust PDE solvers, yet Fourier Neural Operators (FNOs) inherit limitations of discrete Fourier transforms, including mode truncation, aliasing under finite sampling, and error accumulation in long-horizon rollouts. We present FNO‑RC, a dual‑path architecture that augments FNO with a conformal continuous Fourier transform residual branch implemented via piecewise Chebyshev expansions with closed‑form Bessel evaluations. The residual is enabled only in shallow layers and is regularized by a warmup schedule, time‑smoothing, and high‑frequency energy control. Under a unified training and evaluation protocol on Burgers‑1D, Navier–Stokes‑2D, and turbulent Navier–Stokes‑3D, FNO‑RC consistently outperforms FNO (up to 73.68% on 2D and 43.76% on 3D) and stabilizes 100‑step autoregressive rollouts. Cross‑resolution tests and spectral diagnostics show that FNO‑RC restores high‑frequency energy without over‑amplification while preserving efficiency. Code and experiment scripts are publicly available for full reproducibility. This work was supported by the Aeronautical Science Foundation of China under Grant 2023L039068002.
 \end{abstract}
 
 \section{Introduction}
@@ -529,10 +523,10 @@ This work targets scientific computing and fluid simulation. We do not foresee d
 All training/evaluation code and experiment scripts are available at \href{https://github.com/LTQ12/fno-rc-operator}{github.com/LTQ12/fno-rc-operator}. Due to size limits, large datasets (e.g., \texttt{ns\_V1e-4\_N10000\_T30.mat}) and checkpoints are listed with download instructions. We include exact commands/configs to reproduce all figures and tables.
 
 \section*{Acknowledgements}
-This work was supported by Xiamen University. We thank the anonymous reviewers for their constructive feedback. We used writing assistants for language polishing and formatting; all technical content (models, code, experiments, and analysis) was conceived, implemented, and verified by the authors.
+This work was supported by Xiamen University and the Aeronautical Science Foundation of China (Grant 2023L039068002). We thank the anonymous reviewers for their constructive feedback. We used writing assistants for language polishing and formatting; all technical content (models, code, experiments, and analysis) was conceived, implemented, and verified by the authors.
 
 \section*{Author Contributions}
-T.L. conceived the study, implemented models and experiments, conducted analysis, and drafted the manuscript. L.L. contributed to methodology design, theoretical analysis, and manuscript editing. Both authors discussed results and approved the final manuscript.
+T.L. conceived the study, implemented models and experiments, conducted analysis, and drafted the manuscript. C.Z. contributed to idea development and experimental design, and assisted with analysis and writing – review & editing. L.L. contributed to methodology design, supervision, and manuscript editing. All authors discussed results and approved the final manuscript.
 
 \section*{Competing Interests}
 The authors declare no competing financial or non-financial interests.
