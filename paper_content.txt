@@ -1,0 +1,688 @@
+--- Page 1 ---
+Progress In Electromagnetics Research, Vol. 109, 425{440, 2010
+A HIGH ACCURACY CONFORMAL METHOD FOR
+EVALUATING THE DISCONTINUOUS FOURIER
+TRANSFORM
+C. H. Zhuy
+Department of Control Science and Engineering
+Harbin Institute of Technology
+92 West street, Harbin 150001, China
+Q. H. Liu
+Department of Electrical and Computer Engineering
+Duke University, Durham, NC 27708, USA
+Y. Shen and L. J. Liu
+Department of Control Science and Engineering
+Harbin Institute of Technology
+92 West street, Harbin 150001, China
+Abstract |A highly accurate, fast algorithm is proposed to evaluate
+the ¯nite Fourier transform of both continuous and discontinues
+functions. As the discretization is conformal to the function
+discontinuities, this method is called the conformal Fourier transform
+(CFT) method. It is applied to computational electromagnetics to
+calculate the Fourier transform of induced electric current densities in
+a volume integral equation. The spectral discrimination in the CFT
+method can be arbitrary and the spectral range can be as large as
+needed. As no discretization for the Fourier exponential kernel is
+needed, the CFT method is not restricted by the Nyquist sampling
+theorem, thus avoiding the aliasing distortions that exist in other
+traditional methods. The accuracy of the CFT method is greatly
+improved since the method is based on high order interpolation and
+the closed-form Fourier transforms for polynomials partly reduce the
+error due to discretization. Assuming NsandNare the numbers
+Received 20 August 2010, Accepted 26 October 2010, Scheduled 6 November 2010
+Corresponding author: Qing Huo Liu (qhliu@ee.duke.edu).
+yAlso with Department of Electrical and Computer Engineering, Duke University,
+Durham, NC 27708, USA.
+
+--- Page 2 ---
+426 Zhu et al.
+of sampling points in the spatial and spectral domains, respectively,
+the computational cost of the CFT method is O((M+ 1)Nlog2L),
+where Mis the interpolation order and L=Ns¡1
+M. Applications in the
+spectral analysis of electromagnetic ¯elds are demonstrated.
+1. INTRODUCTION
+Fourier transform (FT), as the most important basis for frequency
+domain techniques, is often encountered in scattering [1{3], radar
+antennas [4{6] and many other ¯elds in electromagnetics [7{9].
+Discrete Fourier transform (DFT) is now the dominant tool to
+obtain the Fourier spectrum in numerical computation. DFT can
+be implemented by fast Fourier transform (FFT) algorithms with the
+computational cost of O(NlogN), where Nis the number of sampling
+points. However, the accuracy of the results obtained with the DFT
+depends on the analyticity of the function under consideration; it can
+be sometimes very bad if there are discontinuities in the function [10].
+The Nyquist sampling theorem [11] is a mandatory requirement for
+DFT to work well, i.e., the sampling rate must be at least twice the
+highest frequency of the function in the spatial domain (or temporal
+domain). However, nearly all data collected in practice are ¯nite in
+duration, which means that the function is space-limited (or time-
+limited) and the highest frequency is in¯nite for such a function. This
+causes the aliasing distortions [12]. The frequency resolution and range
+is decided by the sampling points in FFT. The Chirp-z algorithm [13]
+can make the frequency resolution and range more °exible; however,
+since it is still based on the trapezoidal quadrature, when it is used to
+obtain the Fourier transform, it still su®ers from aliasing distortions.
+There have been many works done to improve the accuracy
+in estimating the Fourier transform with a ¯nite duration and
+discontinuous functions; herein we call this the ¯nite discontinuous
+Fourier transform. Simonen and Olkkonen [14] use Simpson rule to
+perform the integration; Zeng [15] proposes linear interpolation for
+f(x); Morelli [16] uses third-order interpolation for f(x), the input
+function in the spatial domain; Froeyen and Hellemans in [10] and
+Beaudoin and Beauchemi in [11] use the reestablishing second- and
+high-order Taylor expansion to approximate f(x), respectively; Fan
+and Liu [17] introduce a double interpolation procedure for f(x) and
+the oscillatory kernel e¡j2¼ux, which is extended to multi-dimension
+in [11]; and [1] has derived an algorithm using high-order interpolation
+forf(x) with Gauss-Chebyshev-Lobatte (GCL) points. Liu et al. [18]
+have recently proposed a ¯nite-di®erence time-domain method that
+can provide calculations for the desired nonuniform frequency points.
+
+--- Page 3 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 427
+From the point of view of numerical computation, DFT is a
+trapezoidal quadrature scheme. The discretization is implemented in
+both the input function f(x) and the oscillatory kernel e¡j2¼ux. In this
+scheme, ¯rstly, in order to represent the oscillating kernel with discrete
+sample points, there should be at least two points per wavelength (or
+two points per period) of e¡j2¼ux. This is an intuitive explanation of
+the Nyquist sampling theorem. Secondly, the trapezoidal quadrature
+can be regarded as using a piecewise linear function to approximate the
+kernel f(x)e¡j2¼ux, and as is well known, a higher-order interpolation
+can obtain better accuracy. Based on these two observations, a method
+is proposed in this contribution that uses higher-order interpolation for
+f(x) and no discretization for the oscillating kernel e¡j2¼uxto obtain
+the Fourier spectrum. The proposed method can obtain much higher
+accuracy estimation of the Fourier integral with a low sampling rate,
+thus overcoming the aliasing phenomenon; it can obtain the Fourier
+spectrum in a frequency range as large as necessary without satisfying
+the Nyquist sampling theorem. Moreover, The frequency resolution
+can be arbitrary.
+Section 2 introduces the algorithm of the proposed Conformal
+Fourier transform (CFT). In Section 3, the algorithm is applied to
+solve a linear time invariant (LTI) system ¯rst, and then used to
+evaluate the Fourier spectrum of the induced electric current density
+in a layered medium in electromagnetics with exponential accuracy
+and low computational time. Section 4 gives the conclusions of this
+contribution.
+2. METHOD
+Before the discussion, an important result is shown ¯rst. The proof of
+this can be found in Appendix A.
+Lemma 1: The ¯nite Fourier transform of a monomial can be
+explicitly expressed as
+Z1
+¡1tme¡j2¼utdt=ewmX
+s=0(¡1)m¡sm!
+(m¡s)!1
+ws+1¡e¡wmX
+s=0m!
+(m¡s)!1
+ws+1(1)
+where w= 2¼ju, and mis a non-negative integer.
+In the following, a highly accurate method is developed for the
+Fourier transform of discontinuous functions, and the fast computation
+algorithm is also derived.
+
+--- Page 4 ---
+428 Zhu et al.
+2.1. CFT for a Continuous Function
+Now we consider the Fourier transform of a discontinuous function
+f(x). Assume that f(x) is continuous within a ¯nite support domain
+[p0; p1],p1> p0and zero elsewhere. Its continuous Fourier transform
+F(u) is de¯ned as
+F(u) =Zp1
+p0f(x)e¡j2¼uxdx (2)
+We divide the interval [ p0; p1] into [ x`; x`+1], where x`=x1+ (`¡
+1)¢;¢ =p1¡p0
+L; x1=p0; xL+1=p1; `= 1;2; : : : ; L . Approximate
+f(x) in each element by an M-th order Lagrange interpolation
+polynomial with interpolation points fx`;kgM+1
+k=1.
+f(x)[x`;x`+1]¼P(M)
+`(x) (3)
+Substituting (3) into the Fourier integration (2), we obtain
+Zp1
+p0f(x)e¡j2¼uxdx¼LX
+`=1Zx`+1
+x`P(M)
+`(x)e¡j2¼uxdx (4)
+By doing the following change of variables in the `-th element
+x=at+h` (5)
+where
+a=¢
+2; h`=x`+1+x`
+2=x1+µ
+`¡1
+2¶
+¢; (6)
+Equation (4) can be rewritten as
+Zp1
+p0f(x)e¡j2¼uxdxw:=j2¼u¼ aLX
+`=1e¡wh`Z1
+¡1P(M)
+`(at+h`)e¡watdt(7)
+Denoting the interpolation points in [ ¡1;1] as ftkgM+1
+k=1, the
+interpolation points fx`;kgM+1
+k=1in the `-th element can be obtained
+by (5). Denoting the interpolation basis function at ftkgM+1
+k=1as
+Lk(t) =MX
+m=0D(k)
+mtm;there is
+P(M)
+`(at+h`) =M+1X
+k=1f(x`;k)MX
+m=0D(k)
+mtm(8)
+
+--- Page 5 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 429
+Substituting (8) into (7) and then applying Lemma 1, we obtain
+Zp1
+p0f(x)e¡wxdx¼ae¡wx1MX
+s=0As
+(wa)s+1(9)
+where
+As=LX
+`=0®s;`e¡wl¢; B m;`=M+1X
+k=1D(k)
+mf(x`;k) (10)
+8
+>>>>>>>>><
+>>>>>>>>>:®s;0=MX
+m=sm!
+(m¡s)!(¡1)m¡sBm;1;
+®s;`=MX
+m=sm!
+(m¡s)![(¡1)m¡sBm;`+1¡Bm;`]; `2[1; L¡1]
+®s;L=¡MX
+m=sm!
+(m¡s)!Bm;L(11)
+Theoretically, if (9) is used to evaluate (2), the result should be
+accurate if f(x) is a polynomial with the order not large than Min its
+¯nite support domain. Let us consider a function
+f(x) =½
+x2+x+ 1; x2[¡1
+2;1
+2]
+0; otherwise(12)
+Fig. 1 shows the relative error of the spectra evaluated with (9). The
+computation is performed with Matlab R2009b in double-precision. It
+is shown that the error become very large when uis near zero, as the
+interpolation order Mincreases.
+This unreasonable phenomenon is due to the round-o® error in
+computation. Detail about the round-o® error can be found in [19].
+It can be seen that ®s;`andAswill increase in the same order as s!
+when sincreases. This will cause large numerical round-o® errors in
+the °oating point computation of (9) when jwajis small and Mis
+large. We will make use of the Taylor expansion of exto overcome this
+di±culty,
+ex= 1 + x+x2
+2!+x3
+3!+: : :+xS
+S!+: : :¼SX
+s=0xs
+s!(13)
+Substituting (6), (8) and (13) into (7) yields
+Zp1
+p0f(x)e¡j2¼uxdx¼ae¡w(x1¡1
+2¢)SX
+s=0A0
+s(wa)s(14)
+
+--- Page 6 ---
+430 Zhu et al.
+ −200−100 0 100 20010−1510−1010−5
+u (m−1)
+(a) M=2, Ns=269Relative Error
+−200−100 0 100 20010−1510−1010−5
+u (m−1)
+(b) M=6, Ns=349Relative Error
+−200−100 0 100 20010−2010 10100
+u (m −1)
+(c) M=10, Ns=371Relative Error
+−200−100 0 100 20010−201001020
+u (m −1)
+(d) M=16, Ns=385Relative Error
+ −200  −100 0 100 20010−201001020
+u (m−1)
+(e) M=18, Ns=397Relative Error
+ −200  −100 0 100 20010−201001020
+u (m −1)
+(f) M=20, Ns=401Relative Error
+Figure 1. Relative Error of spectra evaluated with (9) for (12). (a)
+M= 2, Ns= 269. (b) M= 6, Ns= 349. (c) M= 10, Ns= 371. (d)
+M= 16, Ns= 385. (e) M= 18, Ns= 397. (f) M= 20, Ns= 401.
+where
+A0
+s=LX
+l=1®0
+s;le¡wl¢; ®0
+s;l=MX
+m=0(¡1)s+ (¡1)m
+m+s+ 1Bm;l; (15)
+In the truncated series in (13), it is reasonable to choose S= 30,
+forx·3 in double precision because330
+30!= 7:7621e¡019. Therefore,
+with double precision computation, (14) is used if jwaj ·3; otherwise
+(9) is used. Scan be chosen to be 30. Sand the upper boundary of
+jwajcan be adjusted to obtain proper accuracy. For convenience, we
+de¯ne
+CFT f;L;p0;p1(u) =8
+>>>><
+>>>>:ae¡wx1MX
+s=0As
+(wa)s+1;jwaj>3
+ae¡w(x1¡1
+2¢)SX
+s=0A0
+s(wa)s;jwaj ·3(16)
+We call the method using (16) to compute the Fourier Transform (2)
+
+--- Page 7 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 431
+ −200  −100 0 100 20010 −1510 −1010 −5
+u (m −1)Relative Error
+−200  −100 0 100 20010 −1510 −1010 −5
+u (m −1)Relative Error
+ −200  −100 0 100 20010 −1510 −1010 −5
+u (m −1)Relative Error
+ −200  −100 0 100 20010 −1210 −1010 −8
+u (m −1)Relative Error
+ −200  −100 0 100 20010 −1510 −1010 −5
+u (m −1)Relative Error
+ −200  −100 0 100 20010−1210−1010 −8
+u (m −1)Relative Error(a) M=2, Ns=269 (b) M=6, Ns=349
+(c) M=10, Ns=371 (d) M=16, Ns=385
+(e) M=18, Ns=397 (f) M=20, Ns=401
+Figure 2. Relative Error of spectra evaluated with (16) for (12). (a)
+M= 2, Ns= 269. (b) M= 6, Ns= 349. (c) M= 10, Ns= 371. (d)
+M= 16, Ns= 385. (e) M= 18, Ns= 397. (f) M= 20, Ns= 401.
+as the Conformal Fourier transform (CFT). The relative error of the
+spectrum evaluated with (16) is shown in Fig. 2.
+Now, let us discuss the computational cost of the CFT
+method (16). Suppose the sampling frequency are located at u=
+n¢f; n =¡N=2;¡N=2 + 1 ; : : : ; N= 2¡1;where ¢ frepresents the
+frequency resolution that can be chosen as any number according to
+the requirement, then Ncan be chosen according to the interested
+frequency range. Suppose the the number of upoints satisfying
+jwaj<3 isn1, then the number of upoints satisfying jwaj ¸3 is
+n2=N¡n1.
+It can be seen that the total number of sampling points in
+the space domain is Ns=ML + 1 when (16) is used, if the
+interpolation points satisfy t1=¡1,tM+1= 1. It requires O(M2)
+real multiplications to obtainm!
+(m¡s)!in (11) and O[(M+ 1)2] real
+
+--- Page 8 ---
+432 Zhu et al.
+multiplications to obtain D(k)
+min (8) (See Appendix B for the algorithm
+to compute D(k)
+m). So the cost of computing f®s;lgM;L+1
+s=0;l=1in (11) is
+O(MN s). Equations (10) and (15) are both in the form of chirp z-
+transform and thus can be computed at the cost of O((M+ 1)NlogL)
+andO((S+ 1)n1logL) complex multiplications, respectively [20]. By
+using the Compensated Horner scheme [21], the results of (9) for u
+satisfying j2¼uaj ¸3 can be obtained with O((M+ 1)N) complex
+multiplications, and (14) for satisfying j2¼uaj<3 can be obtained
+with O((S+1)n1) complex multiplications. So the computational cost
+of (16) for CFT is O((M+ 1)NlogL) complex multiplications.
+2.2. CFT for Piecewise Continuous Functions
+Iff(x) is a piecewise continuous function with the ¯rst kind of
+discontinuity located at [ p0; p1; : : : ; p I], making use of (16) in each
+section, we can obtain the result of CFT for f(x) as
+F(u) =i=I¡1X
+i=0Zpi+1
+pif(x)e¡j2¼uxdx¼i=I¡1X
+i=0CFT f; Li; pi; pi+1(u) (17)
+It is easy to know that Equation (17) requires O((M+ 1)NI¡1X
+i=0logLi)
+complex multiplications, where Liis the number of elements in
+[pi; pi+1], based on the discussion in part A.
+It needs to be pointed out that the only approximation used in
+deriving (16) and (17) is the Lagrange interpolation for f(x). Since
+there is no any approximation for the oscillatory kernel e¡j2¼uxterm
+in Fourier transform (2), the algorithm is not restricted by the Nyquist
+sampling theorem, and therefore, overcomes the aliasing distortion.
+3. NUMERICAL RESULTS
+Example 1 illustrates how CFT overcomes aliasing distortions under
+a low sampling density. Then CFT is used to evaluate the Fourier
+spectrum of an induced electric current density in a layered medium;
+we show that CFT is fast and can obtain results with high accuracy,
+and the error has exponential convergence.
+Example 1: Consider a stable LTI system characterized by
+d2y(t)
+dt2+ 4dy(t)
+dt+ 3y(t) =dx(t)
+dt+ 2x(t): (18)
+
+--- Page 9 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 433
+The output of the system can be achieved by the Fourier method
+according to the convolution theorem. Assume the input is
+x(t) =½
+e¡t; t2[0;+1]
+0;otherwise(19)
+First from (18), we know the frequency response of the system is
+H(w) =w+2
+w2+4w+3. The expression of the Fourier transform of input
+signal (19) can be obtained as X(w) =1
+w+1:So the Fourier transform
+of output y(t) isY(w) =H(w)X(w) =w+2
+(w2+4w+3)(w+1):
+F[y(t)](w) is used to represent the Fourier transform of function
+y(t). So Y(w) = F[y(t)](w). The property of Fourier transform
+F[Y(w)](t) = F[F[y(t)]](t) = y(¡t) leads to y(t) = F[Y(w)](¡t).
+That means y(t) can be obtained through Fourier transform of Y(w).
+The results using CFT and FFT both with 321 sampling points
+in the spatial domain are shown in Fig. 3. The aliasing distortion with
+FFT can be observed clearly in the ¯gure, as the sampling density used
+here is lower than the Nyquist sampling density. However, with CFT,
+we can obtain accurate estimation of the output signal. By increasing
+the sampling points, we ¯nd that 4096 points are needed to obtain
+0.48% relative RMS error with FFT; however, CFT requires only 573
+sampling points to achieve 0.54% relative RMS error.
+Example 2: In electromagnetic analysis, the spectra of sources
+and ¯elds are often required. Here we consider a plane wave normally
+impinging on a seven-layer medium with frequency f0= 2 GHz
+0 10 20 30 40 50 60 7000.050.10.150.20.250.30.35
+t (s)Outputanalytic
+CFT
+FFT
+Figure 3. Comparison of the CFT and FFT results for example 1.
+
+--- Page 10 ---
+434 Zhu et al.
+in the vacuum background. The layer interfaces are located at
+[0:1;0:2;0:5;0:7;0:8;0:9]; the relative magnetic permeability is 1
+for all layers, and the relative permittivity is ²1= 1,²2= 32, ²3= 12,
+²4= 20, ²5= 40, ²6= 35, ²7= 1, respectively.
+The induced electric current density J(x) and its spectral
+distribution obtained by CFT are plotted in Fig. 4 and Fig. 5. The
+0 0.2 0.4 0.6 0.8 1  −5  −4  −3  −2 −101
+Spatial Location (m)J (x)Real Part
+Imag. Part ( −3)
+Figure 4. Spatial distribution of an induced electric current density
+in a seven-layer medium impinged by a plane wave at 2 GHz.
+ −600−400  −200 0 200 400 60010  −410  −310  −210 −1100
+u (m  −1)Magnitude
+ −600  −400  −200 0 200 400 600−200−1000100200
+u (m  −1)Phase (deg)
+Figure 5. Spectral distribution of the induced electric current density
+in Fig. 4.
+
+--- Page 11 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 435
+5 10 20 3010−1210−1010−810−610−410−2100
+Points Per WavelengthRelative ErrorM=4
+M=6
+M=8
+M=10
+M=12
+M=14
+Figure 6. Relative RMS error of the evaluated spectrum by CFT
+when Mis ¯xed for the problem in Fig. 4.
+wave number (spatial frequency) interested are assumed to locate
+atu=¡512; : : : ; 511. We use Mto represent the interpolating
+order. Fig. 6, plotted in a log log scale, shows the relative RMS
+error versus the sampling density in terms of the number of points
+per wavelength (PPW) when increasing the sampling density with a
+¯xed M. It requires only 5.44 PPW to achieve 0 :49% error, 7.45 PPW
+to achieve 0 :016% error, and 10.27 PPW to achieve 0 :00047% error
+using interpolation order M= 10.
+The above is a typical small problem, and the exponential
+convergency of CFT error is shown in Fig. 6.
+In real applications, often the electrical size is large, namely the
+domain is much larger than the typical wavelength. Under such
+circumstances, it can be quite challenging for a traditional method
+to obtain accurate results. Let us consider a larger scale problem with
+the same plane wave normal incidence into a large ¯ve-layer medium
+in Example 3. We will compare the performance of CFT with FFT
+in terms of accuracy, number of sampling points required and the
+computation time.
+Example 3: Consider a plane wave impinges on a ¯ve-layer
+medium with f0= 2 GHz in the vacuum background. The layer
+interfaces are located at [1 ;4;7;9],²1= 1, ²2= 3, ²3= 2, ²4= 5,
+and²5= 1; and the wave numbers in the three center layers are
+34:6409;28:2842;29:8142, respectively.
+
+--- Page 12 ---
+436 Zhu et al.
+0 2 4 6 8 10 −0.8 −0.7−0.6−0.5 −0.4 −0.3 −0.2 −0.100.10.2
+Spatial Location (m)J (x)Real Part
+Imag. Part ( −0.5)
+Figure 7. Spatial distribution of the induced electric current density
+in a large ¯ve-layer medium impinged by a plane wave at 2 GHz.
+The induced electric current density J(x) is shown in Fig. 7. The
+frequency interested are assumed to be located at u=¡512; : : : ; 511.
+Table 1 shows the comparisons of accuracy, number of sampling
+points in the spatial domain and CPU time with CFT and FFT. The
+computation is performed on the same desktop computer with Matlab
+Table 1. Error, number of sampling points and run time for CFT and
+Bluestein's FFT (double-precision).
+Error Ns Timing (s)
+FFT1:056£10¡28192 0.0430
+5:107£10¡316384 0.0925
+2:534£10¡332768 0.2007
+6:319£10¡4131072 1.1070
+7:896£10¡51048576 11.7282
+CFT4:803£10¡5543 0:2768
+2:604£10¡7723 0:3368
+8:601£10¡101011 0:3569
+9:179£10¡121605 0:3921
+
+--- Page 13 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 437
+R2009b for double-precision. Bluestein's FFT is used here. With a
+comparable CPU time, CFT can obtain nearly ten orders of magnitude
+more accurate than FFT with nearly ten times fewer sampling points.
+To achieve 7 :896£10¡5error with FFT, it requires 10486576 sampling
+points in the spatial domain and the CPU time is 11 :7282 s. However,
+to achieve 4 :803£10¡5error, CFT requires only 543 sampling points
+and the CPU time is 0 :2768 s; in other words, CFT requires very few
+sampling points and at the same time, approximately 42 times faster.
+4. CONCLUSION
+In this contribution, the conformal Fourier transform algorithm as
+a high accuracy method for evaluating the ¯nite Fourier transform
+for discontinuous functions is presented. The algorithm makes use of
+high order interpolation for the function in space domain and with no
+approximation to the oscillatory kernel. This algorithm can achieve
+any large range of spectra with arbitrary frequency resolution without
+the restriction of the Nyquist sampling theorem. The accuracy of this
+algorithm is much better than traditional Discrete Fourier transform
+with comparable computation time in FFT; at the same time the
+number of sampling points required in the spatial domain can be
+greatly reduced. The computation cost of the proposed CFT algorithm
+isO[(M+ 1)NI¡1X
+i=0logLi]. The algorithm is useful in computational
+electromagnetics and other areas where spectral methods are required.
+ACKNOWLEDGMENT
+CHZ, YS, and LJL are supported by the Natural Science Foundation
+of China (NSFC) under Grant 60901043.
+APPENDIX A. PROOF OF LEMMA 1
+Lemma 1: The ¯nite Fourier transform of a monomial is
+Z1
+¡1tme¡j2¼utdt=ewmX
+s=0(¡1)m¡sm!
+(m¡s)!1
+ws+1¡e¡wmX
+s=0m!
+(m¡s)!1
+ws+1
+(A1)
+where mis a non-negative integer.
+Proof: Principle of Mathematical Induction is adopted here.
+
+--- Page 14 ---
+438 Zhu et al.
+When m= 0, the left-hand side of (A1) can be rewritten into
+Z1
+¡1e¡j2¼utdt=ej2¼ut
+¡j2¼ujt=1
+t=¡1=ej2¼u¡e¡j2¼u
+j2¼u=ew¡e¡w
+w(A2)
+and right hand of (A1) can be rewritten as
+ewmX
+s=0(¡1)m¡sm!
+(m¡s)!1
+ws+1¡e¡wmX
+s=0m!
+(m¡s)!1
+ws+1jm=0=ew¡e¡w
+w(A3)
+It is obvious that (A2) = (A3), so (A1) holds for m= 0.
+Then we assume that for m=S, (A1) holds, or
+Z1
+¡1tSe¡j2¼utdt=ewSX
+s=0(¡1)S¡sS!
+(S¡s)!1
+ws+1¡e¡wSX
+s=0S!
+(S¡s)!1
+ws+1(A4)
+When m=S+ 1, according to Newton Leibniz formula the left-hand
+side of (A1) is
+Z1
+¡1tS+1e¡j2¼utdt=¡tS+1e¡wt
+wjt=1
+t=¡1+S+ 1
+wZ1
+¡1tSe¡wtdt:
+Substituting (A4) into the above equation, we obtain
+Z1
+¡1tS+1e¡j2¼utdt=(¡1)S+1ew
+w¡e¡w
+w
++ewS+1X
+s=1(¡1)S+1¡s(S+ 1¡s)!
+(S+ 1¡s)!1
+ws+1¡e¡wS+1X
+s=1(S+ 1)!
+((S+ 1)¡s)!1
+ws+1:
+It is obvious that(¡1)S+1ew
+w=(¡1)S+1¡0(S+1)!
+(S+1¡0)!1
+w0+1;e¡w
+w=
+(S+1)!
+(S+1¡0)!1
+w0+1:Hence, (A1) holds when m=S+ 1. So (A1) holds
+for all non-negative integer m.
+APPENDIX B. ALGORITHM FOR COMPUTING D(K)
+M
+ForM+ 1 di®erent points ftkgM+1
+k=1,fD(k)
+mgM;M +1
+m=0;k=1are de¯ned as
+Lk(t) =M+1Y
+i=1; i6=kt¡ti
+tk¡ti=MX
+m=0D(k)
+mtm:To compute D(k)
+m, we de¯ne
+l0(t) =M+1Y
+i=1(t¡ti) =M+1X
+m=0Emtm; lk(t) =M+1Y
+i=1; i6=k(t¡ti) =MX
+m=0dmtm:
+Hence,
+lk(t) =l0(t)
+t¡tk(B1)
+
+--- Page 15 ---
+Progress In Electromagnetics Research, Vol. 109, 2010 439
+Computing cost for EmisO(M2) [22]. According to (B1),(
+d(k)
+M=E(M+1)
+d(k)
+m=E(m+1)+d(k)
+m+1tk; m=M¡1; M¡2; : : : ; 0(B2)
+It requires M2+Mreal multiplications to compute (B2). Then lk(tk) =
+M+1Y
+i=1; i6=k(t¡ti) =MX
+m=0dmtm
+kcan be computed by the Horner scheme [21]
+with Mreal multiplications. It can be seen that D(k)
+m=d(k)
+m
+lk(tk). So
+fD(k)
+mgM;M +1
+m=0;k=1can be computed with the cost of O(M2).
+REFERENCES
+1.Liu, Y. H., Z. P. Nie, and Q. H. Liu, \DIFFT: A fast and
+accurate algorithm for Fourier transform integrals of discontinuous
+functions," IEEE Microwave and Wireless Components Letters ,
+Vol. 18, No. 2, 716{718, 2008.
+2.Fan, Z., R. S. Chen, H. Chen, and D. Z. Ding, \Weak form
+nonuniform fast Fourier transform method for solving volume
+integral equations," Progress In Electromagnetics Research ,
+Vol. 89, 275{289, 2009.
+3.Semnani, A. and M. Kamyab, \Truncated cosine Fourier series
+expansion method for solving 2-D inverse scattering problems,"
+Progress In Electromagnetics Research , Vol. 81, 73{97, 2008.
+4.Huang, Y., Y. Liu, Q. H. Liu, and J. Zhang, \Improved 3-D GPR
+detection by NUFFT combined with MPD method," Progress In
+Electromagnetics Research , Vol. 103, 185{199, 2010.
+5.Yang, S., Y. Chen, and Z. P. Nie, \Simulation of time modulated
+linear antenna arrays using the FDTD method," Progress In
+Electromagnetics Research , Vol. 98, 175{190, 2009.
+6.Najjar-Khatirkolaei, B. N. and A. R. Sebak, \Slot antenna on a
+conducting elliptic cylinder coated by nonconfocal chiral media,"
+Progress In Electromagnetics Research , Vol. 93, 125{143, 2009.
+7.Liu, Y., Z. Liang, and Z. Yang, \Computation of electromagnetic
+dosimetry for human body using parallel FDTD algorithm com-
+bined with interpolation technique," Progress In Electromagnetics
+Research , Vol. 82, 95{107, 2008.
+8.Swillam, M. A., M. H. Bakr, and X. Li, \Full wave sensitivity
+analysis of guided wave structures using FDTD," Journal of
+Electromagnetic Waves and Applications , Vol. 22, No. 16, 2135{
+2145, 2008.
+
+--- Page 16 ---
+440 Zhu et al.
+9.Lei, J. Z., C. H. Liang, W. Ding, and Y. Zhang, \EMC analysis
+of antennas mounted on electrically large platforms with parallel
+FDTD method," Progress In Electromagnetics Research , Vol. 84,
+205{220, 2008.
+10.Froeyen, M. and L. Hellemans, \Improved algorithm for the
+discrete Fourier transform," Review of Scienti¯c Instruments ,
+Vol. 56, 2325, 1985.
+11.Beaudoin, N. and S. S. Beauchemin, \A new numerical
+Fourier transform in d-dimensions," IEEE Transactions on Signal
+Processing, Vol. 51, No. 5, 1422{1430, 2003.
+12.Sundararajan, D., The Discrete Fourier Transform: Theory,
+Algorithms and Applications , World Scienti¯c Pub. Co. Inc., 2001.
+13.Rabiner, L. R., R. W. Schafer, and C. M. Rader, \The chirp
+z-transform algorithm and its application," IEEE Trans. Audio
+Electroacoust , Vol. 17, 86{92, 1969.
+14.Simonen, P. and H. Olkkonen, \Fast method for computing the
+Fourier integral transform via Simpson's numerical integration,"
+Journal of Biomedical Engineering , Vol. 7, No. 4, 337{340, 1985.
+15.Zeng, P., \High-accuracy formula for discrete calculation of fourier
+transforms," Applied Mathematics and Computation , Vol. 106,
+Nos. 2{3, 117{140, 1999.
+16.Morelli, E. A., \High accuracy evaluation of the ¯nite Fourier
+transform using sampled data," NASA TM , Vol. 110340, 1997.
+17.Fan, G.-X. and Q. H. Liu, \Fast Fourier transform for
+discontinuous functions," IEEE Transactions on Antennas and
+Propagation , Vol. 52, No. 2, 461{465, 2004.
+18.Liu, Y. H., Q. H. Liu, and Z. P. Nie, \A new e±cient
+FDTD time-to-frequency-domain conversion algorithm," Progress
+In Electromagnetics Research , Vol. 92, 33{46, 2009.
+19.Higham, N. J., Accuracy and Stability of Numerical Algorithms ,
+Society for Industrial Mathematics, 2002.
+20.Sarkar, I. and A. T. Fam, \The interlaced chirp z transform,"
+Signal Processing , Vol. 86, No. 9, 2221{2232, 2006.
+21.Graillat, S., P. Langlois, and N. Louvet, \Compensated horner
+scheme," Research Report, Vol. 4, 2005.
+22.El-Mikkawy, M. E. A., \Explicit inverse of a generalized
+Vandermonde matrix," Applied Mathematics and Computation ,
+Vol. 146, Nos. 2{3, 643{651, 2003.
+

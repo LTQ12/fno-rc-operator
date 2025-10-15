@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: "Fourier Neural Operator with Conformal Fourier Transform Residual Correction (FNO-RC)"
+authors:
+  - family-names: Liu
+    given-names: Taiqian
+    affiliation: Xiamen University
+  - family-names: Liu
+    given-names: Lijun
+    affiliation: Xiamen University
+message: "If you use this repository, please cite this work."
+repository-code: "https://github.com/LTQ12/fno-rc-operator"
+keywords:
+  - Fourier Neural Operator
+  - Conformal Fourier Transform
+  - Neural Operator
+  - PDE
+  - Turbulence
+license: MIT
+version: 0.1.0
+preferred-citation:
+  type: article
+  title: "Fourier Neural Operator with Conformal Fourier Transform Residual Correction for Partial Differential Equations"
+  authors:
+    - family-names: Liu
+      given-names: Taiqian
+    - family-names: Liu
+      given-names: Lijun
+  journal: Manuscript
+  year: 2025
