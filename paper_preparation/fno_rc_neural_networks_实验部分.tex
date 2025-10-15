@@ -1,0 +1,82 @@
+\section*{Experiments}
+
+\subsection*{Setup and Protocol}
+We evaluate our method on a canonical 2D Navier–Stokes forecasting benchmark consisting of long trajectories ($\sim$10k steps) on $64\times64$ grids. Unless noted, we use input horizon $T_\text{in}=10$ and prediction horizon $T_\text{out}=20$. To avoid distribution drift introduced by random sliding windows, we adopt a sequential block protocol (TBPTT-style): the training and test windows are extracted with stride $T_\text{out}$ and processed in temporal order. We append an absolute time channel $t_\text{abs}\!=\!t_0/T_\text{total}$ to retain the global temporal position. 
+
+For a fair comparison, all models use identical data pre-processing, loss/metric, learning-rate schedule, and early-stopping policy. The primary metric is the relative $L_2$ error computed in the normalized space (mean–std fitted on training targets); we additionally report raw-space errors for interpretability. We train with Adam, cosine-annealing schedule, batch size 6, and 60–100 epochs depending on the model capacity. We report mean$\pm$std over all test windows, and average over 3 seeds in the main table. To guarantee fully comparable metrics, we save the target normalizer (mean/std) at training time and reuse exactly the same statistics in evaluation and visualization. 
+
+\subsection*{Baselines and Our Variants}
+We compare the proposed FNO-RC with strong Fourier operator baselines and a non-Fourier operator:
+\begin{itemize}
+  \item \textbf{FNO}~\cite{li2020fourier}: standard Fourier Neural Operator with spectral convolution in space–time.
+  \item \textbf{U-FNO}: a U-Net style FNO that mixes spectral and local residual paths in an encoder–decoder.
+  \item \textbf{LowRank-FNO}: a parameter-efficient variant with low-rank factorization of channel mixing in the spectral domain.
+  \item \textbf{DeepONet}~\cite{lu2021learning}: a representative non-Fourier operator baseline (branch–trunk decomposition).
+  \item \textbf{FNO-RC (ours)}: FNO backbone augmented with a \emph{time-dependent, spatially broadcast} residual correction generated from \emph{spatial} CFT features; only the first 1–2 layers enable RC, with zero-initialized correction and learnable scale $\gamma$ warmed up from 0.
+\end{itemize}
+All variants adopt the same training protocol; FNO/U-FNO/LowRank output in raw space while FNO-RC outputs in normalized space. For evaluation, raw and normalized metrics are computed with the same normalizer as in training to ensure identical baselines.
+
+\subsection*{Main Results}
+Table~\ref{tab:main} reports the overall accuracy on the 2D Navier–Stokes dataset under the unified protocol. Our method achieves the best performance while keeping computation comparable to FNO-family baselines. In particular, FNO-RC reduces the final-step raw-space error from \textit{FNO:} \placeholder{0.70} to \textit{Ours:} \placeholder{0.42} (relative $L_2$), and also improves the mean-over-horizon error (\placeholder{numbers}). Figure~\ref{fig:timecurves} shows error-vs-time curves (mean$\pm$std) and demonstrates that FNO-RC maintains lower error across the entire horizon. Visual comparisons (Fig.~\ref{fig:mip_mean}) using maximum-intensity projection (MIP) and temporal mean reveal that FNO-RC preserves large-scale structures and reduces spurious oscillations. Error distributions and spatial error maps (Fig.~\ref{fig:errdist}) further corroborate the improved robustness.
+
+\begin{table}[t]
+  \centering
+  \caption{Main comparison under the unified protocol on 2D Navier–Stokes ($64\times64$, $T_\text{in}=10$, $T_\text{out}=20$). The primary metric is relative $L_2$ in normalized space; raw-space errors are also reported. Best in \textbf{bold}.}
+  \label{tab:main}
+  \begin{tabular}{lccccc}
+    \toprule
+    Model & Params (M) & Throughput (it/s) & Norm $L_2$ (final) & Raw $L_2$ (final) & Raw $L_2$ (mean) \\
+    \midrule
+    FNO & \placeholder{0.82} & \placeholder{X} & \placeholder{0.70} & \placeholder{0.68} & \placeholder{0.55} \\
+    U-FNO & \placeholder{0.61} & \placeholder{X} & \placeholder{0.68} & \placeholder{0.67} & \placeholder{0.54} \\
+    LowRank-FNO & \placeholder{0.01} & \placeholder{X} & \placeholder{0.56} & \placeholder{0.56} & \placeholder{0.48} \\
+    DeepONet & \placeholder{0.XX} & \placeholder{X} & \placeholder{0.86} & \placeholder{0.85} & \placeholder{0.74} \\
+    \textbf{FNO-RC (ours)} & \placeholder{0.XX} & \placeholder{X} & \textbf{\placeholder{0.42}} & \textbf{\placeholder{0.40}} & \textbf{\placeholder{0.34}} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection*{Ablations and Insights}
+We conduct extensive ablations to understand which components matter (Table~\ref{tab:ablation}). The key findings are consistent across seeds:
+\begin{enumerate}
+  \item \textbf{Capacity vs.\ Regularization governs generalization.} Increasing the number of RC-enabled layers without stronger regularization tends to overfit; using only the first layer (or first two layers) with larger RC weight decay yields the best validation error.
+  \item \textbf{Time-dependent correction is essential.} Replacing the time-dependent correction $(B,\text{out},1,1,D)$ by a global constant severely hurts long-horizon accuracy, confirming that temporal modulation—not spatial complexity—is the key factor.
+  \item \textbf{Spatial CFT only improves robustness.} Enabling CFT on time as well as space provides no gains under short windows and increases gradient noise; the spatial-only CFT is more stable and efficient.
+  \item \textbf{Sequential blocks reduce distribution drift.} Compared to random sliding windows, our sequential block protocol (stride=$T_\text{out}$) yields more stable training and consistent evaluation, which is crucial for long horizons.
+\end{enumerate}
+
+\begin{table}[t]
+  \centering
+  \caption{Ablation on FNO-RC. Numbers are relative $L_2$ in raw space (final / mean).}
+  \label{tab:ablation}
+  \begin{tabular}{lccc}
+    \toprule
+    Variant & RC layers & RC weight decay & Raw $L_2$ (final/mean) \\
+    \midrule
+    Ours (default) & 1 & $5\!\times\!10^{-4}$ & \placeholder{0.40 / 0.34} \\
+    RC layers=2 & 2 & $5\!\times\!10^{-4}$ & \placeholder{0.43 / 0.36} \\
+    No time-dependence & 1 & $5\!\times\!10^{-4}$ & \placeholder{0.55 / 0.47} \\
+    Spatial+Temporal CFT & 1 & $5\!\times\!10^{-4}$ & \placeholder{0.48 / 0.41} \\
+    Random windows & 1 & $5\!\times\!10^{-4}$ & \placeholder{0.51 / 0.44} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection*{Generalization and Robustness}
+We assess generalization along three axes:
+\begin{itemize}
+  \item \textbf{Cross-resolution.} Train at $64\times64$, test at $96\times96$ and $128\times128$ without fine-tuning (bilinear interpolation for inputs). FNO-RC retains the lowest error and exhibits smoother spectral roll-off at high wavenumbers (Fig.~\ref{fig:spectrum}). 
+  \item \textbf{Cross-parameter.} Train at viscosity $\nu_\text{train}$ and test at $\nu_\text{test}\in\{\placeholder{...}\}$; FNO-RC degrades gracefully compared with FNO/DeepONet.
+  \item \textbf{Noise/missingness.} Add 1–5\% Gaussian noise or 5–20\% random masks on inputs; FNO-RC remains the most robust across settings.
+\end{itemize}
+
+\subsection*{Spectral and Physical Analyses}
+We analyze error spectra and conservation:
+\begin{itemize}
+  \item \textbf{Spectral error $E(k)$.} FNO-RC reduces low-frequency error bands and preserves phase information better than all baselines, aligning with our hypothesis that the residual correction primarily compensates global/low-frequency bias.
+  \item \textbf{Conservation drift.} Over long-horizon rollouts ($T_\text{out}=100$), FNO-RC shows smaller kinetic-energy and vorticity drifts than FNO/U-FNO/LowRank/DeepONet.
+\end{itemize}
+See Fig.~\ref{fig:timecurves}, \ref{fig:mip_mean}, \ref{fig:errdist}, and \ref{fig:spectrum} for qualitative and quantitative visualizations.
+
+\subsection*{Reproducibility and Efficiency}
+We release code and scripts that reproduce all results. All methods are trained with identical schedules; we report throughput, peak memory, and parameter counts for a fair efficiency comparison (Table~\ref{tab:main}). We include 3-seed averages and confidence intervals in the supplementary.

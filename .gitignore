@@ -39,5 +39,4 @@ data/
 *.mat
 *.pt
 .git_backup_*
-paper_preparation/
-.github/
+

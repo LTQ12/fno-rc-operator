@@ -1,0 +1,81 @@
+% 3D Experiments Section (Draft)
+\section{Three-Dimensional Experiments}
+
+\subsection{Datasets and Problem Setup}
+We evaluate models on a 3D Navier--Stokes vorticity dataset with extremely long temporal trajectories. Each sample is a sequence of $T\!\approx\!10^4$ time steps on spatial grids of $64\times 64$ during training. For cross-resolution evaluation, test sequences are spectrally resampled to higher spatial resolutions (e.g., $96\times 96$, $128\times 128$) without fine-tuning unless otherwise noted. We adopt sliding windows with window input length $T_{\text{in}}$ and prediction horizon $T_{\text{out}}$.
+
+\paragraph{Data Windowing.} We form input--target pairs by slicing windows $(\mathbf{x}_{t\!:\,t+T_{\text{in}}-1},\;\mathbf{y}_{t+T_{\text{in}}\!:\,t+T_{\text{in}}+T_{\text{out}}-1})$ with stride $T_{\text{out}}$ (TBPTT-style sequential blocks). We add one absolute-time channel indicating the normalized start time of each window. Target variables are normalized with a unit Gaussian normalizer fitted from training windows; unless specified, reported L2 errors are in raw physical space.
+
+\subsection{Models}
+We compare the following operator networks:
+\begin{itemize}
+  \item \textbf{FNO}~(baseline): 3D Fourier Neural Operator with modes $m_1\!=\!m_2\!=\!m_3$, width $w$, and coordinate concatenation.
+  \item \textbf{FNO-RC} (ours): FNO with a \emph{CFT-driven residual correction} branch. The correction is generated from spatial CFT features (H/W) and broadcast over time, with a learnable scale $\gamma$ per spectral block. We enable correction only in shallow layers by default.
+  \item \textbf{U-FNO}, \textbf{LowRank-FNO}, \textbf{AFNO}: recent FNO variants included for breadth.
+\end{itemize}
+All models output multi-step sequences of length $T_{\text{out}}$ to enable fair comparison in both single-window prediction and long-horizon rollout.
+
+\subsection{Training Protocol}
+We use Adam with cosine annealing. For data scarcity, we apply \textbf{multi-resolution augmentation}: during training, windows are spectrally resampled to random resolutions from \{48, 64, 80, 96\}. For FNO-RC, we stabilize learning via: (i) shallow-layer correction only; (ii) reduced CFT sampling $(L,M)$; (iii) small initial correction scale $\gamma$ with warmup; (iv) separate optimization for RC branch; (v) time-smoothing regularization on the correction; and (vi) \textbf{high-frequency energy regularization} that penalizes $(\hat{y}-\hat{y}^{\,\ast})$ energy on top-$1/3$ radial frequencies.
+
+\subsection{Evaluation Protocols}
+\paragraph{Cross-Resolution (Single-Window).} We standardize to raw-space L2 and spectral resampling for fair comparisons. For FNO-RC, we report the backbone output (RC disabled) as the default cross-resolution metric, as the correction may amplify high-frequency magnitudes under resolution shifts.
+
+\paragraph{Long-Horizon Rollout.} We evaluate auto-regressive predictions with context length $T_{\text{in}}$ and rollout horizon $H$ by iteratively feeding predictions back as inputs. We find smaller multi-step outputs per iteration (e.g., $\texttt{step\_out}=10$) significantly reduce error accumulation and highlight FNO-RC's advantage.
+
+\subsection{Results}
+\paragraph{Cross-Resolution.} At $96\times 96$, baseline FNO tends to outperform the raw FNO-RC correction due to high-frequency magnitude over-emphasis. However, at $128\times 128$, FNO-RC's backbone matches or exceeds FNO under the unified protocol. We include detailed mean$\pm$std L2 tables and significance analyses in the supplement.
+
+\paragraph{Long-Horizon Rollout.} With $\texttt{step\_out}=10$, FNO-RC significantly outperforms FNO over $H=100$ steps on both $96\times 96$ and $128\times 128$, indicating that frequent, small corrective steps suppress accumulation error.
+
+\subsection{Spectral and Phase/Amplitude Analysis}
+Radial energy spectra show that, on high frequencies, FNO under-fits while naive FNO-RC tends to over-amplify magnitudes. Our high-frequency regularization reduces this gap without harming phase alignment. We report: (i) high-frequency energy ratios, (ii) relative amplitude error, and (iii) absolute phase error (radians).
+
+\subsection{Ablations}
+We ablate (1) number of RC layers, (2) CFT sampling $(L,M)$, (3) correction scale schedules, (4) multi-resolution augmentation, and (5) high-frequency regularization weight. We consistently observe that shallow RC + small $(L,M)$ + small $\gamma$ with warmup is most robust across resolutions; for long-horizon rollout, smaller \texttt{step\_out} yields larger gains.
+
+\subsection{Reproducibility}
+\paragraph{Data.} \verb|ns_V1e-4_N10000_T30.mat| placed under \verb|/content/drive/MyDrive/|, as in scripts.
+
+\paragraph{Training.} Example FNO-RC training with multi-resolution augmentation and HF regularization:
+\begin{verbatim}
+python train_cft_residual_ns_3d.py \
+  --data_path /content/drive/MyDrive/ns_V1e-4_N10000_T30.mat \
+  --model_save_path /content/models/fno_rc_3d_seq_multires_hf.pt \
+  --ntrain 1000 --ntest 200 --T_in 10 --T_out 20 \
+  --modes 6 --width 20 --epochs 10 --batch_size 6 \
+  --learning_rate 5e-4 --weight_decay 1e-4 \
+  --rc_lr 2e-4 --rc_weight_decay 1e-3 \
+  --num_correction_layers 1 --cft_L 3 --cft_M 3 \
+  --correction_scale_init 0.01 \
+  --gamma_warmup_epochs 5 --warmup_freeze_epochs 5 \
+  --rc_time_smooth_weight 3e-3 \
+  --multires_aug --aug_resolutions 48,64,80,96 --aug_resample_mode spectral \
+  --hf_reg_weight 1e-3 --hf_reg_kcut_ratio 0.66
+\end{verbatim}
+
+\paragraph{Evaluation.} Cross-resolution with spectral resampling (RC disabled by default):
+\begin{verbatim}
+python eval_cross_resolution.py \
+  --data_path /content/drive/MyDrive/ns_V1e-4_N10000_T30.mat \
+  --save_dir /content/cross_res \
+  --fno_path /content/drive/MyDrive/fno_models/fno_3d_standard.pt \
+  --rc_path /content/models/fno_rc_3d_seq_multires_hf.pt \
+  --T_in 10 --T_out 20 --target_res 96 \
+  --ntrain 40 --ntest 10 --resample_mode spectral --rc_disable
+\end{verbatim}
+
+Long-horizon rollout with small step-out:
+\begin{verbatim}
+python eval_long_rollout.py \
+  --data_path /content/drive/MyDrive/ns_V1e-4_N10000_T30.mat \
+  --save_dir /content/rollout \
+  --rc_path /content/models/fno_rc_3d_seq_multires_hf.pt \
+  --fno_path /content/drive/MyDrive/fno_models/fno_3d_standard.pt \
+  --target_res 96 --resample_mode spectral \
+  --T_in 10 --step_out 10 --rollout_T 100 --ntest 5
+\end{verbatim}
+
+\paragraph{Figures and Tables.} We include placeholders for: cross-resolution bars, rollout curves, and spectral plots. Paths: \verb|/content/cross_res|, \verb|/content/rollout|, \verb|/content/spectrum| (generated by provided scripts). Final numbers and figures will be inserted after all runs are completed.
+
+

@@ -1,0 +1,90 @@
+name: Build LaTeX (paper)
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+    paths:
+      - 'paper_preparation/**'
+      - '.github/workflows/latex.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TeXLive
+        uses: teatimeguest/setup-texlive-action@v3
+        with:
+          packages: >-
+            scheme-medium latexmk xetex xetex-def xunicode ucharcat
+            filehook fontspec graphics graphics-def tools
+            amsmath hyperref geometry xcolor wrapfig caption subcaption
+            fancyhdr booktabs siunitx mathtools microtype biblatex biber
+
+      - name: Build PDF (XeLaTeX)
+        working-directory: paper_preparation
+        run: |
+          latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error fno_rc_nmi_v5_revised.tex
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: paper_preparation/fno_rc_nmi_v5_revised.pdf
+
+name: build-paper
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'paper_preparation/**'
+      - '.github/workflows/latex.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up TeX Live
+        uses: teatimeguest/setup-texlive-action@v3
+        with:
+          packages: >-
+            scheme-small
+            latexmk
+            texlive-latex-recommended
+            texlive-latex-extra
+            texlive-fonts-recommended
+            texlive-science
+            pgf
+            pgfplots
+            xcolor
+            times
+            amsmath
+            amsfonts
+            amsthm
+            booktabs
+            caption
+            subcaption
+            siunitx
+            multirow
+
+      - name: Build PDF
+        working-directory: paper_preparation
+        run: |
+          latexmk -pdf -interaction=nonstopmode fno_rc_nmi_v5_revised.tex || true
+          latexmk -pdf -interaction=nonstopmode fno_rc_nmi_v5_revised.tex || true
+          ls -lh fno_rc_nmi_v5_revised.pdf || true
+
+      - name: Upload artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: paper_preparation/fno_rc_nmi_v5_revised.pdf
