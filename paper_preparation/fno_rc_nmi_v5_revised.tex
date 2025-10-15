@@ -58,11 +58,11 @@ Our results show that hybrid continuous–discrete spectral representations prov
 
 \section{Introduction}
 
-Physical systems—from turbulent flows to quantum dynamics—evolve according to partial differential equations. While traditional numerical solvers remain the gold standard for accuracy, they buckle under dimensionality curses and demand prohibitive computational budgets at high resolutions. Neural operators \citep{kovachki2021neural,lu2021learning} offer an intriguing alternative: rather than approximating functions pointwise, they learn mappings between infinite-dimensional function spaces. Among these, Fourier Neural Operators (FNOs) \citep{Li2020FNO} stand out. By parameterizing integral kernels in Fourier space and exploiting the convolution theorem, FNOs achieve resolution-invariant learning—sometimes accelerating simulations by orders of magnitude.
+Physical systems—from turbulent flows to quantum dynamics—evolve according to partial differential equations. While traditional numerical solvers remain the gold standard for accuracy, they suffer from the curse of dimensionality and require prohibitive computational budgets at high resolutions. Neural operators \citep{kovachki2021neural,lu2021learning} provide an alternative paradigm: rather than approximating functions pointwise, they learn mappings between infinite-dimensional function spaces. Among these, Fourier Neural Operators (FNOs) \citep{Li2020FNO} have demonstrated strong performance. By parameterizing integral kernels in Fourier space and exploiting the convolution theorem, FNOs enable resolution-robust learning and can substantially accelerate simulations.
 
 However, FNO's reliance on discrete Fourier transforms creates deep-rooted pathologies. Finite sampling triggers spectral aliasing; periodic boundary assumptions clash with real-world physics; mode truncation obliterates high-frequency features essential for shocks and vortices. Perhaps most insidious: small spectral biases compound exponentially during autoregressive prediction, causing catastrophic divergence in chaotic systems.
 
-Enter \textbf{FNO-RC}—our dual-path architecture that marries standard FNO with a Continuous Fourier Transform residual branch. The central observation? CFT handles discontinuities through conformal mapping and Chebyshev polynomial discretization \citep{barnett2010conformal}, achieving exponential convergence where DFT falters algebraically. We activate this correction strategically: shallow layers only, time-dependent but spatially broadcast, rigorously regularized against instability.
+We propose \textbf{FNO-RC}, a dual-path architecture that integrates standard FNO with a Continuous Fourier Transform residual branch. The central observation is that CFT handles discontinuities through conformal mapping and Chebyshev polynomial discretization \citep{barnett2010conformal}, achieving exponential convergence where DFT exhibits only algebraic decay. We activate this correction strategically: shallow layers only, time-dependent but spatially broadcast, and rigorously regularized against instability.
 
 \textbf{Contributions.} Beyond proposing the dual-path architecture, we establish its mathematical foundations and demonstrate breakthrough empirical gains: 73.68\% improvement on 2D Navier-Stokes, 43.76\% on 3D high-Reynolds turbulence. Cross-resolution tests, 100-step rollouts, and spectral diagnostics paint a consistent picture of success.
 
@@ -70,11 +70,11 @@ Enter \textbf{FNO-RC}—our dual-path architecture that marries standard FNO wit
 
 \textbf{Neural Operators.} Learning operators—not just functions—marks a conceptual leap \citep{kovachki2021neural,azizzadenesheli2024neural}. Where traditional networks map finite vectors, neural operators target maps $\G: \mathcal{U} \rightarrow \mathcal{V}$ between infinite-dimensional spaces. DeepONet \citep{lu2021learning,wang2021learning} pioneered this via branch-trunk decomposition, though its point-wise evaluation limits efficiency. Graph approaches \citep{li2020multipole,li2020neural} excel on irregular meshes but struggle with global interactions.
 
-FNO \citep{Li2020FNO} changed the game: Fourier-space kernel parameterization enables $O(N \log N)$ global convolutions. Yet its variants reveal tensions in the field. Factorized FNO \citep{tran2021factorized} trades accuracy for speed through low-rank decomposition—a compromise that hurts turbulent flows. Geo-FNO \citep{li2023geometry} handles curved geometries elegantly but at substantial implementation cost. U-FNO \citep{wen2022u} imports multi-scale U-Net ideas, though whether spatial hierarchy truly benefits spectral methods remains debatable. AFNO \citep{guibas2021adaptive,pathak2022fourcastnet} adds attention—impressively scaling to weather forecasting, but do we really need such complexity for PDE operators? Physics-Informed FNO \citep{li2021physics} enforces constraints as soft penalties, begging the question: how hard should we bake in physics versus letting data speak?
+FNO \citep{Li2020FNO} has demonstrated strong performance: Fourier-space kernel parameterization enables $O(N \log N)$ global convolutions. Variants reflect different trade-offs. Factorized FNO \citep{tran2021factorized} improves efficiency via low-rank decomposition at the potential cost of accuracy on turbulent flows. Geo-FNO \citep{li2023geometry} extends to curved geometries with higher implementation complexity. U-FNO \citep{wen2022u} introduces multi-scale hierarchies, with benefits relative to purely spectral parameterizations varying across tasks. AFNO \citep{guibas2021adaptive,pathak2022fourcastnet} incorporates attention and scales effectively to geophysical forecasting, while increasing architectural complexity. Physics-Informed FNO \citep{li2021physics} imposes soft physics constraints, raising the question of how strongly to encode priors versus relying on data-driven learning.
 
 \textbf{Spectral Methods.} Classical spectral collocation \citep{boyd2001chebyshev,trefethen2019approximation} achieves exponential convergence for smooth solutions via orthogonal polynomials. The catch? Gibbs oscillations demolish accuracy near discontinuities. PINNs \citep{raissi2019physics,karniadakis2021physics} merge neural networks with residuals—conceptually appealing, but high-frequency features and loss-weight tuning remain thorny in practice.
 
-\textbf{Continuous Fourier Transform.} Barnett and Greengard's conformal approach \citep{barnett2010conformal} sidesteps Gibbs artifacts through complex-plane deformation and Chebyshev discretization. We're the first to harness this for neural operators, proving continuous and discrete spectra can synergize rather than compete.
+\textbf{Continuous Fourier Transform.} Barnett and Greengard's conformal approach \citep{barnett2010conformal} sidesteps Gibbs artifacts through complex-plane deformation and Chebyshev discretization. To our knowledge, we are among the first to harness this for neural operators, showing that continuous and discrete spectra can synergize rather than compete.
 
 \section{Notation and Mathematical Preliminaries}
 
@@ -396,7 +396,7 @@ DeepONet & 0.289 $\pm$ 0.017 & 0.037 $\pm$ 0.006 & 1.08 $\pm$ 0.11 \\
 \end{tabular}
 \end{table}
 
-\textbf{Analysis.} The 73.68\% improvement on 2D Navier-Stokes is our key achievement. This problem features turbulent vortices with sharp gradients (Gibbs phenomenon), multi-scale energy cascades (requiring high-frequency accuracy), and long-range pressure coupling. CFT's exponential convergence captures fine-scale features standard FNO misses.
+\textbf{Analysis.} The 73.68\% improvement on 2D Navier-Stokes constitutes the primary gain observed under our protocol. This setting features turbulent vortices with sharp gradients (susceptible to Gibbs artifacts), multi-scale energy cascades, and long-range pressure coupling. The CFT branch, with exponential convergence under piecewise analytic assumptions, enhances the representation of fine-scale features that standard FNO tends to under-resolve.
 
 The 43.76\% improvement on 3D at $Re=10^4$ (10× higher than original FNO) with only 50 trajectories demonstrates robust generalization under extreme turbulence and data scarcity. The 3.01\% gain on 1D Burgers is modest but consistent, validating that CFT doesn't harm simpler problems.
 
@@ -424,7 +424,7 @@ AFNO & 1.181 $\pm$ 0.333 & 1.264 $\pm$ 0.380 \\
 \end{tabular}
 \end{table}
 
-\textbf{Analysis.} Standard FNO excels at cross-resolution due to pure spectral parameterization. FNO-RC is competitive (1.124 vs. 0.811 at $96^2$; 1.190 vs. 1.112 at $128^2$), with the gap narrowing at higher resolution (38.6\% → 7.0\%), suggesting CFT benefits increase with richer frequency content. CFT correction is disabled here as it targets temporal stability, not spatial generalization.
+\textbf{Analysis.} Standard FNO typically performs strongly on cross-resolution transfer owing to its spectral parameterization. FNO-RC remains competitive (1.124 vs. 0.811 at $96^2$; 1.190 vs. 1.112 at $128^2$), and the gap narrows at higher resolutions (38.6\% to 7.0\%), indicating that CFT gains become more pronounced with richer frequency content. We disable CFT correction here because its primary role is temporal stabilization rather than spatial generalization.
 
 \subsection{Long-Horizon Rollouts: Where FNO-RC Excels}
 
@@ -449,7 +449,7 @@ $128 \times 128$, step\_out=5 & \textbf{1.003 $\pm$ 0.069} & 1.186 $\pm$ 0.101 \
 \end{tabular}
 \end{table}
 
-\textbf{Analysis.} FNO‑RC achieves 43.2\% average improvement. Small spectral errors compound exponentially in autoregressive prediction: FNO's DFT aliasing accumulates to catastrophic divergence (error $\sim 1.8$ at 100 steps), while CFT correction prevents this (error $\sim 1.0$). Smaller \texttt{step\_out}=5 yields 0.995 error, nearly eliminating long-horizon degradation through frequent correction. Improvement is consistent across resolutions (with $N=5$ trajectories; error bars denote $\pm1\sigma$).
+\textbf{Analysis.} FNO‑RC yields a 43.2\% average improvement in our long-horizon setting. In autoregressive prediction, spectral biases may accumulate across steps; the CFT residual appears to mitigate such accumulation. Smaller \texttt{step\_out}=5 produces lower error (0.995), consistent with the hypothesis that more frequent correction stabilizes rollouts. Trends are consistent across resolutions (with $N=5$ trajectories; error bars denote $\pm1\sigma$).
 
 \subsection{Spectral Diagnostics: Understanding the Mechanism}
 \label{sec:spectral}
@@ -472,7 +472,7 @@ Phase abs. error (rad, mean $\pm$ std) & --- & 1.571 $\pm$ 0.014 & 1.558 $\pm$ 0
 \end{tabular}
 \end{table}
 
-\textbf{Analysis.} Standard FNO under-represents high-frequency energy (0.37 vs. 2.75 ground truth, 86.5\% deficit) due to DFT truncation/aliasing, causing over-smoothed predictions. FNO-RC achieves near-perfect energy (2.89 vs. 2.75, 5.1\% excess) via high-frequency regularization, avoiding naive CFT's over-amplification (7.77, 183\% excess). Amplitude/phase errors are slightly higher (1.95 vs. 1.72, 1.571 vs. 1.558) but acceptable given overall accuracy gains. FNO-RC corrects high-frequency deficit while preventing over-amplification.
+\textbf{Analysis.} Standard FNO under-represents high-frequency energy (0.37 vs. 2.75 ground truth) consistent with truncation/aliasing effects, which can lead to over-smoothing. FNO-RC reaches 2.89, close to the ground truth (5.1\% excess), with explicit high-frequency regularization helping avoid over-amplification observed in naive CFT variants (7.77). Amplitude/phase errors are comparable in magnitude; overall, the energy profile is better aligned with the reference while preserving stability.
 
 \subsection{Ablation Study: Dissecting the Contributions}
 
