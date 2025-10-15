@@ -53,7 +53,7 @@ We introduce FNO-RC, a dual-path architecture that augments FNO with a conformal
 
 On Burgers-1D, Navier–Stokes-2D, and turbulent Navier–Stokes-3D, FNO-RC achieves consistent gains (up to 73.68% on 2D; 43.76% on 3D high-Re) under a unified training and evaluation protocol. Cross-resolution testing, 100-step rollouts, and spectral diagnostics corroborate that CFT corrects FNO’s high-frequency deficit while preserving stability.
 
-Our results show that hybrid continuous–discrete spectral representations provide a principled route to robust long-horizon operator learning without sacrificing efficiency. Code, data splits, scripts, and trained weights will be released for full reproducibility.
+Our results show that hybrid continuous–discrete spectral representations provide a principled route to robust long-horizon operator learning without sacrificing efficiency. Code, data splits, scripts, and selected figures are publicly available at \href{https://github.com/LTQ12/fno-rc-operator}{github.com/LTQ12/fno-rc-operator} for full reproducibility.
 \end{abstract}
 
 \section{Introduction}
@@ -359,7 +359,7 @@ We operate in a high-Reynolds-number regime (effective $\mathrm{Re}\approx10^4$)
 \end{tabular}
 \end{table}
 
-\paragraph{Reproducibility details.} We fix the random seed to 2025 for PyTorch/NumPy/Python. Unless noted, results are averaged over 3 independent runs (mean$\pm$std). Training/evaluation scripts, configurations, commands, and weights will be released for full reproducibility.
+\paragraph{Reproducibility details.} We fix the random seed to 2025 for PyTorch/NumPy/Python. Unless noted, results are averaged over 3 independent runs (mean$\pm$std). Training/evaluation scripts, configurations, commands, and pre-trained weights are provided in the open repository: \href{https://github.com/LTQ12/fno-rc-operator}{github.com/LTQ12/fno-rc-operator}.
 
 \section{Results}
 
@@ -526,7 +526,7 @@ The CFT branch introduces extra parameters and memory; while our shallow activat
 This work targets scientific computing and fluid simulation. We do not foresee direct negative societal impacts. Code and data are released for research reproducibility.
 
 \section*{Data and Code Availability}
-The 3D Navier-Stokes dataset (\texttt{ns\_V1e-4\_N10000\_T30.mat}) and all training/evaluation code will be released at an open repository upon publication. Interim access can be provided for peer review upon reasonable request.
+All training/evaluation code and experiment scripts are available at \href{https://github.com/LTQ12/fno-rc-operator}{github.com/LTQ12/fno-rc-operator}. Due to size limits, large datasets (e.g., \texttt{ns\_V1e-4\_N10000\_T30.mat}) and checkpoints are listed with download instructions. We include exact commands/configs to reproduce all figures and tables.
 
 \section*{Acknowledgements}
 This work was supported by Xiamen University. We thank the anonymous reviewers for their constructive feedback.
